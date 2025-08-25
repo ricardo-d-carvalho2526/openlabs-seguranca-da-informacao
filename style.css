@@ -133,3 +133,12 @@ button:hover {
 }
 
 
+
+
+.company-logo {
+    max-width: 200px; /* Ajuste o tamanho conforme necessário */
+    height: auto;
+    margin-bottom: 20px;
+}
+
+
