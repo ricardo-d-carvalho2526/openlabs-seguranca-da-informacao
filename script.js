@@ -6,6 +6,19 @@ document.addEventListener("DOMContentLoaded", () => {
     loadingScreen.innerHTML = "<div class=\"spinner\"></div><p>Carregando próximo cenário...</p>";
     document.body.appendChild(loadingScreen);
 
+    const feedbackModal = document.createElement("div");
+    feedbackModal.id = "feedback-modal";
+    feedbackModal.innerHTML = `
+        <div class=\"modal-content\">
+            <p id=\"modal-feedback-text\"></p>
+            <button id=\"modal-ok-btn\">OK</button>
+        </div>
+    `;
+    document.body.appendChild(feedbackModal);
+
+    const modalOkBtn = document.getElementById("modal-ok-btn");
+    const modalFeedbackText = document.getElementById("modal-feedback-text");
+
     const scenarios = [
         {
             id: "phishing_email",
@@ -100,7 +113,6 @@ document.addEventListener("DOMContentLoaded", () => {
         {
             id: "suspicious_website",
             title: "Navegação em Site Suspeito",
-            description: "Você recebe um link de um amigo por mensagem instantânea para um site que promete descontos incríveis em produtos de tecnologia, mas o endereço parece um pouco estranho.",
             options: [
                 { text: "A) Clicar no link para verificar os descontos, pois seu amigo enviou.", correct: false, feedback: "Incorreto! Sites suspeitos podem ser armadilhas de phishing ou conter malware. Sempre verifique a URL antes de clicar." },
                 { text: "B) Ignorar o link e avisar seu amigo sobre a possibilidade de ser um site malicioso.", correct: true, feedback: "Correto! Você agiu com cautela e ajudou a proteger seu amigo. Você ganha a insígnia \"Navegador Cauteloso\"!" },
@@ -109,15 +121,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     ];
 
-    // Shuffle options for each scenario to avoid predictable correct answers
-    scenarios.forEach(scenario => {
-        scenario.options.sort(() => Math.random() - 0.5);
-    });
+    // Remove shuffling to maintain A, B, C order
+    // scenarios.forEach(scenario => {
+    //     scenario.options.sort(() => Math.random() - 0.5);
+    // });
 
     let currentScenarioIndex = 0;
     let score = 0;
     const totalScenarios = scenarios.length;
     const passingScore = 7; // Pontuação mínima para aprovação
+    const wikiLink = "https://alabs.atlassian.net/wiki/spaces/INFRAINB/overview?homepageId=88702978";
 
     function showLoadingScreen() {
         loadingScreen.style.display = "flex";
@@ -126,6 +139,25 @@ document.addEventListener("DOMContentLoaded", () => {
     function hideLoadingScreen() {
         loadingScreen.style.display = "none";
     }
+
+    function showFeedbackModal(message, isCorrect) {
+        modalFeedbackText.textContent = message;
+        modalFeedbackText.style.color = isCorrect ? "green" : "red";
+        feedbackModal.style.display = "flex";
+    }
+
+    modalOkBtn.addEventListener("click", () => {
+        feedbackModal.style.display = "none";
+        showLoadingScreen();
+        setTimeout(() => {
+            currentScenarioIndex++;
+            if (currentScenarioIndex < totalScenarios) {
+                loadScenario(scenarios[currentScenarioIndex]);
+            } else {
+                endGame();
+            }
+        }, 1000); // Shortened timeout for smoother transition after OK
+    });
 
     function loadScenario(scenario) {
         hideLoadingScreen();
@@ -147,25 +179,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     score++;
                 }
 
-                displayFeedback(chosenOption.feedback, chosenOption.correct);
-                showLoadingScreen();
-                
-                setTimeout(() => {
-                    currentScenarioIndex++;
-                    if (currentScenarioIndex < totalScenarios) {
-                        loadScenario(scenarios[currentScenarioIndex]);
-                    } else {
-                        endGame();
-                    }
-                }, 3000); 
+                showFeedbackModal(chosenOption.feedback, chosenOption.correct);
             });
         });
-    }
-
-    function displayFeedback(message, isCorrect) {
-        const feedbackDiv = document.getElementById("feedback-message");
-        feedbackDiv.textContent = message;
-        feedbackDiv.style.color = isCorrect ? "green" : "red";
     }
 
     function endGame() {
@@ -174,11 +190,11 @@ document.addEventListener("DOMContentLoaded", () => {
         let documentationLink = "";
 
         if (score >= passingScore) {
-            finalMessage += `<p>Parabéns! Você foi aprovado e demonstrou um excelente conhecimento em segurança da informação.</p>`;
-            documentationLink = `<p>Continue aprimorando seus conhecimentos: <a href=\"#\">Documentação Avançada de Segurança da Informação - Open Labs</a></p>`;
+            finalMessage += `<p>Parabéns! Você foi aprovado e demonstrou um excelente conhecimento em segurança da informação. Você ganhou a insígnia \"Defensor Digital Master\"!</p>`;
+            documentationLink = `<p>Continue aprimorando seus conhecimentos em nossa Wiki: <a href=\"${wikiLink}\" target=\"_blank\">Documentação Avançada de Segurança da Informação - Open Labs</a></p>`;
         } else {
             finalMessage += `<p>Não se preocupe! Você não atingiu a pontuação de aprovação. Segurança da informação é um aprendizado contínuo. Revise os conceitos e tente novamente.</p>`;
-            documentationLink = `<p>Recursos de apoio: <a href=\"#\">Treinamento Básico de Conscientização em Segurança - Open Labs</a></p>`;
+            documentationLink = `<p>Recursos de apoio em nossa Wiki: <a href=\"${wikiLink}\" target=\"_blank\">Treinamento Básico de Conscientização em Segurança - Open Labs</a></p>`;
         }
 
         scenarioContainer.innerHTML = finalMessage + documentationLink;
@@ -193,4 +209,5 @@ document.addEventListener("DOMContentLoaded", () => {
         loadScenario(scenarios[currentScenarioIndex]);
     });
 });
+
 
