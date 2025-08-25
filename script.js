@@ -26,6 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     let currentScenarioIndex = 0;
+    let score = 0;
+    const totalScenarios = scenarios.length;
 
     function loadScenario(scenario) {
         scenarioContainer.innerHTML = `
@@ -41,19 +43,21 @@ document.addEventListener("DOMContentLoaded", () => {
             button.addEventListener("click", (event) => {
                 const chosenOptionIndex = event.target.dataset.index;
                 const chosenOption = scenario.options[chosenOptionIndex];
+                
+                if (chosenOption.correct) {
+                    score++;
+                }
+
                 displayFeedback(chosenOption.feedback, chosenOption.correct);
-                // Optionally move to next scenario or end game after feedback
+                
                 setTimeout(() => {
                     currentScenarioIndex++;
-                    if (currentScenarioIndex < scenarios.length) {
+                    if (currentScenarioIndex < totalScenarios) {
                         loadScenario(scenarios[currentScenarioIndex]);
                     } else {
-                        scenarioContainer.innerHTML = `<h2>Fim do Jogo!</h2><p>Você completou todos os cenários. Parabéns por suas decisões de segurança!</p>`;
-                        startGameBtn.style.display = "block";
-                        startGameBtn.textContent = "Jogar Novamente";
-                        currentScenarioIndex = 0;
+                        endGame();
                     }
-                }, 3000); // Wait 3 seconds before moving to next scenario or ending game
+                }, 3000); 
             });
         });
     }
@@ -62,6 +66,28 @@ document.addEventListener("DOMContentLoaded", () => {
         const feedbackDiv = document.getElementById("feedback-message");
         feedbackDiv.textContent = message;
         feedbackDiv.style.color = isCorrect ? "green" : "red";
+    }
+
+    function endGame() {
+        let finalMessage = `<h2>Fim do Jogo!</h2><p>Você completou todos os cenários. Sua pontuação final é: ${score} de ${totalScenarios}.</p>`;
+        let documentationLink = "";
+
+        if (score === totalScenarios) {
+            finalMessage += `<p>Parabéns! Você demonstrou um excelente conhecimento em segurança da informação.</p>`;
+            documentationLink = `<p>Continue aprimorando seus conhecimentos: <a href=\"#\">Documentação Avançada de Segurança da Informação</a></p>`;
+        } else if (score >= totalScenarios / 2) {
+            finalMessage += `<p>Bom trabalho! Você acertou a maioria dos cenários, mas ainda há espaço para melhorias.</p>`;
+            documentationLink = `<p>Revise os conceitos básicos: <a href=\"#\">Guia Essencial de Segurança da Informação - Open Labs</a></p>`;
+        } else {
+            finalMessage += `<p>Não se preocupe! Segurança da informação é um aprendizado contínuo. Revise os conceitos e tente novamente.</p>`;
+            documentationLink = `<p>Recursos de apoio: <a href=\"#\">Treinamento Básico de Conscientização em Segurança</a></p>`;
+        }
+
+        scenarioContainer.innerHTML = finalMessage + documentationLink;
+        startGameBtn.style.display = "block";
+        startGameBtn.textContent = "Jogar Novamente";
+        currentScenarioIndex = 0;
+        score = 0; // Reset score for new game
     }
 
     startGameBtn.addEventListener("click", () => {
