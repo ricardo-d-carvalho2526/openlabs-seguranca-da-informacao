@@ -1,6 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
     const startGameBtn = document.getElementById("start-game");
     const scenarioContainer = document.getElementById("scenario-container");
+    const loadingScreen = document.createElement("div");
+    loadingScreen.id = "loading-screen";
+    loadingScreen.innerHTML = "<div class=\"spinner\"></div><p>Carregando próximo cenário...</p>";
+    document.body.appendChild(loadingScreen);
 
     const scenarios = [
         {
@@ -28,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
             title: "Criação de Senha Fraca",
             description: "Você precisa criar uma nova senha para um sistema interno. O sistema aceita senhas curtas e simples.",
             options: [
-                { text: "A) Usar 'senha123' para facilitar a memorização.", correct: false, feedback: "Incorreto! Senhas simples são facilmente descobertas. Use senhas complexas e únicas." },
+                { text: "A) Usar \'senha123\' para facilitar a memorização.", correct: false, feedback: "Incorreto! Senhas simples são facilmente descobertas. Use senhas complexas e únicas." },
                 { text: "B) Usar uma combinação de letras maiúsculas e minúsculas, números e símbolos, com pelo menos 12 caracteres.", correct: true, feedback: "Correto! Senhas fortes protegem suas contas. Você ganha a insígnia \"Mestre das Senhas\"!" },
                 { text: "C) Reutilizar uma senha antiga que você usa em outros sites.", correct: false, feedback: "Incorreto! Reutilizar senhas é um grande risco. Se uma for comprometida, todas as suas contas estarão em perigo." }
             ]
@@ -105,12 +109,26 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     ];
 
+    // Shuffle options for each scenario to avoid predictable correct answers
+    scenarios.forEach(scenario => {
+        scenario.options.sort(() => Math.random() - 0.5);
+    });
+
     let currentScenarioIndex = 0;
     let score = 0;
     const totalScenarios = scenarios.length;
     const passingScore = 7; // Pontuação mínima para aprovação
 
+    function showLoadingScreen() {
+        loadingScreen.style.display = "flex";
+    }
+
+    function hideLoadingScreen() {
+        loadingScreen.style.display = "none";
+    }
+
     function loadScenario(scenario) {
+        hideLoadingScreen();
         scenarioContainer.innerHTML = `
             <h2>${scenario.title}</h2>
             <p>${scenario.description}</p>
@@ -130,6 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 displayFeedback(chosenOption.feedback, chosenOption.correct);
+                showLoadingScreen();
                 
                 setTimeout(() => {
                     currentScenarioIndex++;
@@ -150,6 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function endGame() {
+        hideLoadingScreen();
         let finalMessage = `<h2>Fim do Jogo!</h2><p>Você completou todos os cenários. Sua pontuação final é: ${score} de ${totalScenarios}.</p>`;
         let documentationLink = "";
 
